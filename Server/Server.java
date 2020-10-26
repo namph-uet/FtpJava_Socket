@@ -16,7 +16,9 @@ public class Server {
         InputStream is;
         ServerSocket listener  = null;
         Socket sock = null;
+        File requestFile = null;
         String message = null;
+        String filename = "";
         boolean servReady = false;
         boolean typingFileName = false;
         boolean startDownload = false;
@@ -72,12 +74,12 @@ public class Server {
                     }
                     else if(typingFileName) {
                         try {
-                            File requestFile = new File(message);
-                            System.out.println("File: " + message + "end");
+                            filename = message;
+                            requestFile = new File(filename);
 
                             fis = new FileInputStream(requestFile);
 
-                            System.out.println("File: " + message);
+                            System.out.println("File: " + filename);
                             System.out.println("Size: " + requestFile.length());
                             typingFileName = false;
                             haveFile = true;
@@ -91,20 +93,27 @@ public class Server {
                         }
                     }
 
-                    if(wrongSyntax) {
-                        os.write(WRONG_SYNTAX.getBytes());
-                        wrongSyntax = false;
-                    }
-
                     if(message.equalsIgnoreCase("START") && haveFile) {
                         byte [] buffer = new byte[FILE_READER_BUFF];
                         wrongSyntax = false;
                         int count = 0;
-                        while((count = fis.read(buffer)) > 0) {
-                            os.write(buffer, 0, count);
+
+                        requestFile = new File(filename);
+                        fis = new FileInputStream(requestFile);
+
+                        while(fis.read(buffer) > 0) {
+                            os.write(buffer);
                             System.out.println(new String(buffer));
                             os.flush();
+                            buffer = new byte[FILE_READER_BUFF];
                         }
+
+                        wrongSyntax = false;
+                    }
+
+                    if(wrongSyntax) {
+                        os.write(WRONG_SYNTAX.getBytes());
+                        wrongSyntax = false;
                     }
                     os.flush();
                 }
@@ -125,3 +134,4 @@ public class Server {
         }
     }
 }
+

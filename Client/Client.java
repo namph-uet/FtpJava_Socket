@@ -17,6 +17,13 @@ public class Client {
         String response;
         boolean startDownload = false;
         byte[] buffer = new byte[FILE_READER_BUFF];
+        FileOutputStream fout = null;
+
+        try {
+            fout = new FileOutputStream("download.txt");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
         try {
             // request connect to server
@@ -42,20 +49,21 @@ public class Client {
         try {
             // Ghi dữ liệu vào luồng đầu ra của Socket tại Client.
             while (true) {
+
                 input = scanner.nextLine();
                 os.write(input.getBytes());
                 os.flush();
 
                 if(input.toUpperCase().equals("QUIT")) break;
-                int nread = is.read(buffer);
-                System.out.println("Message received from server: " + new String(buffer));
-
                 if(input.equalsIgnoreCase("start")) startDownload = true;
-                while (nread > 0 && startDownload) {
+
+                int nread = is.read(buffer);
+
+                if(startDownload) {
+                    fout.write(buffer);
+                }
+                else {
                     System.out.println("Message received from server: " + new String(buffer));
-                    os.write(buffer,0,0);
-                    nread = is.read(buffer, 0,FILE_READER_BUFF);
-//                    System.out.println("Message received from server: " + new String(buffer));
                 }
             }
 
