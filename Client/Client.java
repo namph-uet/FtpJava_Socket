@@ -1,11 +1,11 @@
-/// name: Phạm Hoàng Nam
-// mssv: 17021164
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;
 
 public class Client {
     public final static int FILE_READER_BUFF = 4096;
+    public final static int MESSAGE_BUFF = 4096;
+
     public static void main(String[] args) {
 
         // Địa chỉ máy chủ.
@@ -14,10 +14,11 @@ public class Client {
         Socket socketOfClient = null;
         OutputStream os = null;
         InputStream is = null;
-        String response;
         boolean startDownload = false;
         byte[] buffer = new byte[FILE_READER_BUFF];
         FileOutputStream fout = null;
+        int fileLength = 0;
+        final String TYPE_START = "Type start to start download";
 
         try {
             fout = new FileOutputStream("download.txt");
@@ -42,14 +43,15 @@ public class Client {
             return;
         }
 
-        System.out.println("Input a message to the echo server (QUIT for exit): ");
         String input;
         Scanner scanner = new Scanner(System.in);
 
         try {
-            // Ghi dữ liệu vào luồng đầu ra của Socket tại Client.
-            while (true) {
 
+            while (true) {
+                System.out.println("Input a message to the echo server (QUIT for exit): ");
+
+                buffer = new byte[MESSAGE_BUFF];
                 input = scanner.nextLine();
                 os.write(input.getBytes());
                 os.flush();
@@ -57,13 +59,28 @@ public class Client {
                 if(input.toUpperCase().equals("QUIT")) break;
                 if(input.equalsIgnoreCase("start")) startDownload = true;
 
-                int nread = is.read(buffer);
+                if(!startDownload) {
+                    is.read(buffer);
+                    System.out.println("Message received from server: " + new String(buffer));
+                }
+
+                String response = new String(buffer).replaceAll("\r\n", "").replaceAll("\u0000.*", "");
+
+                if(response.split(",").length == 2 && response.split(",")[1].equalsIgnoreCase(TYPE_START)) {
+                    fileLength = Integer.parseInt(response.split(",")[0].split(":")[1]);
+                    System.out.println(fileLength);
+                }
 
                 if(startDownload) {
-                    fout.write(buffer);
-                }
-                else {
-                    System.out.println("Message received from server: " + new String(buffer));
+                    int remaining = fileLength;
+                    int read = 0;
+                    while ((read = is.read(buffer, 0, Math.min(buffer.length, remaining))) > 0) {
+                        fout.write(buffer);
+                        buffer = new byte[FILE_READER_BUFF];
+                        remaining -= read;
+                    }
+                    startDownload = false;
+                    System.out.println("download is done!");
                 }
             }
 
@@ -78,4 +95,3 @@ public class Client {
         }
     }
 }
-
