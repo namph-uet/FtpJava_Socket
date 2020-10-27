@@ -1,3 +1,5 @@
+// name: Phạm Hoàng Nam
+// mssv: 17021164
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;
@@ -68,7 +70,6 @@ public class Client {
 
                 if(response.split(",").length == 2 && response.split(",")[1].equalsIgnoreCase(TYPE_START)) {
                     fileLength = Integer.parseInt(response.split(",")[0].split(":")[1]);
-                    System.out.println(fileLength);
                 }
 
                 if(startDownload) {
