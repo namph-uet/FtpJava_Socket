@@ -1,5 +1,6 @@
 // name: Phạm Hoàng Nam
 // mssv: 17021164
+
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;
@@ -11,8 +12,8 @@ public class Client {
     public static void main(String[] args) {
 
         // Địa chỉ máy chủ.
-        final String serverHost = "localhost";
-        final int cliPort = 9998;
+        final String serverHost;
+        final int cliPort = 9999;
         Socket socketOfClient = null;
         OutputStream os = null;
         InputStream is = null;
@@ -22,11 +23,17 @@ public class Client {
         int fileLength = 0;
         final String TYPE_START = "Type start to start download";
 
+        String input;
+        Scanner scanner = new Scanner(System.in);
+
         try {
             fout = new FileOutputStream("download.txt");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+
+        System.err.println("Enter server address: ");
+        serverHost = scanner.nextLine();
 
         try {
             // request connect to server
@@ -44,9 +51,6 @@ public class Client {
             System.err.println("Couldn't get I/O for the connection to " + serverHost);
             return;
         }
-
-        String input;
-        Scanner scanner = new Scanner(System.in);
 
         try {
 
@@ -82,6 +86,7 @@ public class Client {
                     }
                     startDownload = false;
                     System.out.println("download is done!");
+                    System.out.println("file: " + new File("download.txt").getAbsolutePath());
                 }
             }
 
@@ -96,3 +101,4 @@ public class Client {
         }
     }
 }
+
